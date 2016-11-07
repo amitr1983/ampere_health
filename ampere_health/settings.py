@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'app',
+    'fitapp',
+    # 'social_auth',
 ]
 
 MIDDLEWARE = [
@@ -131,3 +133,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
+
+FITAPP_CONSUMER_KEY = '227XHX'
+FITAPP_CONSUMER_SECRET = 'e6cd00b32b5570a445dd9a7048e05bfe'
+# FITAPP_LOGOUT_REDIRECT='/fitbit/logout'
+# FITAPP_LOGIN_REDIRECT='/fitbit/complete/'
+FITAPP_SUBSCRIBE = False
+FITAPP_SUBSCRIBER_ID = 1
