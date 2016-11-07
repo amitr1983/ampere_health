@@ -22,6 +22,8 @@ from . import utils
 from .models import UserFitbit, TimeSeriesData, TimeSeriesDataType
 from .tasks import get_time_series_data, subscribe, unsubscribe
 
+def index(request):
+    return render(request, 'index.html')
 
 @login_required
 def login(request):
@@ -62,34 +64,32 @@ def complete(request):
     :ref:`FITAPP_LOGIN_REDIRECT`.
     If :ref:`FITAPP_SUBSCRIBE` is set to True, add a subscription to user
     data at this time.
-    Requires the id of the user/model that will be associated with a UserFitbit
-    to be inserted into request.session['fb_user_id'] prior to calling the
-    view.
     URL name:
         `fitbit-complete`
     """
-    user_model = UserFitbit.user.field
-
-    fb = utils.create_fitbit()
     try:
-        token = request.session.pop('token')
-        verifier = request.GET.get('oauth_verifier')
-        fb_user_id = int(request.session['fb_user_id'])
-        user = user_model.rel.to.objects.get(pk=fb_user_id)
+        code = request.GET['code']
     except KeyError:
         return redirect(reverse('fitbit-error'))
+
+    callback_uri = request.build_absolute_uri(reverse('fitbit-complete'))
+    fb = utils.create_fitbit(callback_uri=callback_uri)
     try:
-        fb.client.fetch_access_token(verifier, token=token)
-    except:
+        token = fb.client.fetch_access_token(code, callback_uri)
+        access_token = token['access_token']
+        print(access_token)
+        fitbit_user = token['user_id']
+        print(fitbit_user)
+    except KeyError:
         return redirect(reverse('fitbit-error'))
 
-    if UserFitbit.objects.filter(fitbit_user=fb.client.user_id).exists():
+    if UserFitbit.objects.filter(fitbit_user=fitbit_user).exists():
         return redirect(reverse('fitbit-error'))
 
-    fbuser, _ = UserFitbit.objects.get_or_create(user=user)
-    fbuser.auth_token = fb.client.resource_owner_key
-    fbuser.auth_secret = fb.client.resource_owner_secret
-    fbuser.fitbit_user = fb.client.user_id
+    fbuser, _ = UserFitbit.objects.get_or_create(user=request.user)
+    fbuser.access_token = access_token
+    fbuser.fitbit_user = fitbit_user
+    fbuser.refresh_token = token['refresh_token']
     fbuser.save()
 
     # Add the Fitbit user info to the session
@@ -99,7 +99,7 @@ def complete(request):
             SUBSCRIBER_ID = utils.get_setting('FITAPP_SUBSCRIBER_ID')
         except ImproperlyConfigured:
             return redirect(reverse('fitbit-error'))
-        subscribe.apply_async((fbuser.fitbit_user, str(SUBSCRIBER_ID)), countdown=5)
+        subscribe.apply_async((fbuser.fitbit_user, SUBSCRIBER_ID), countdown=5)
         # Create tasks for all data in all data types
         for i, _type in enumerate(TimeSeriesDataType.objects.all()):
             # Delay execution for a few seconds to speed up response

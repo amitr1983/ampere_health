@@ -54,10 +54,12 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'ampere_health.urls'
 
+PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': os.path.join(PROJECT_PATH, 'templates'),
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -134,8 +136,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-FITAPP_CONSUMER_KEY = <FITAPP_CONSUMER_KEY >
-FITAPP_CONSUMER_SECRET = <FITAPP_CONSUMER_SECRET>
+FITAPP_CONSUMER_KEY = '227XHX'
+FITAPP_CONSUMER_SECRET = 'e6cd00b32b5570a445dd9a7048e05bfe'
 # FITAPP_LOGOUT_REDIRECT='/fitbit/logout'
 # FITAPP_LOGIN_REDIRECT='/fitbit/complete/'
 FITAPP_SUBSCRIBE = False

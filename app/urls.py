@@ -6,6 +6,7 @@ from django.conf.urls import url
 from django.contrib import admin
 
 urlpatterns = [
+	url(r'^$', views.index, name='fitbit-home'),
     url(r'^login/$', views.login, name='fitbit-login'),
     url(r'^complete/$', views.complete, name='fitbit-complete'),
     url(r'^error/$', views.error, name='fitbit-error'),
