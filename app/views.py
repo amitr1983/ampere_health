@@ -25,7 +25,6 @@ from fitbit.exceptions import (HTTPUnauthorized, HTTPForbidden, HTTPConflict,
 from .forms import *
 from . import utils
 from .models import UserFitbit, TimeSeriesData, TimeSeriesDataType
-from .tasks import get_time_series_data, subscribe, unsubscribe
 
 def index(request):
     return render(request, 'login..html')
