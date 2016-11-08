@@ -13,17 +13,22 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET
 from six import string_types
+from django.contrib.auth import logout
+from django.views.decorators.csrf import csrf_protect
+from django.shortcuts import render_to_response
+from django.http import HttpResponseRedirect
+from django.template import RequestContext
 
 from fitbit.exceptions import (HTTPUnauthorized, HTTPForbidden, HTTPConflict,
                                HTTPServerError)
 
-from . import forms
+from .forms import *
 from . import utils
 from .models import UserFitbit, TimeSeriesData, TimeSeriesDataType
 from .tasks import get_time_series_data, subscribe, unsubscribe
 
 def index(request):
-    return render(request, 'index.html')
+    return render(request, 'login..html')
 
 @login_required
 def login(request):
@@ -398,3 +403,41 @@ def get_data(request, category, resource):
         raise
 
     return make_response(100, data)
+ 
+@csrf_protect
+def register(request):
+    if request.method == 'POST':
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            user = User.objects.create_user(
+            username=form.cleaned_data['username'],
+            password=form.cleaned_data['password1'],
+            email=form.cleaned_data['email']
+            )
+            return HttpResponseRedirect('/register/success/')
+    else:
+        form = RegistrationForm()
+    variables = RequestContext(request, {
+    'form': form
+    })
+ 
+    return render_to_response(
+    'registration/register.html',
+    variables,
+    )
+ 
+def register_success(request):
+    return render_to_response(
+    'registration/success.html',
+    )
+ 
+def logout_page(request):
+    logout(request)
+    return HttpResponseRedirect('registration/login.html')
+ 
+@login_required
+def home(request):
+    return render_to_response(
+    'home.html',
+    { 'user': request.user }
+    )
