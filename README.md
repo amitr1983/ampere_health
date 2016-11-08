@@ -1,5 +1,7 @@
 #ampere_health
 
+Set up Virtual Env first. Follow steps given at http://docs.python-guide.org/en/latest/dev/virtualenvs/
+
 1. Update mysql database credentials in settings.py under 'DATABASES'.
 2. Login into https://dev.fitbit.com/apps/new
 3. Register an app.
